@@ -1,5 +1,8 @@
+using CountryBlocker.Application.Interfaces;
+using CountryBlocker.Application.Interfaces.IRepository;
 using CountryBlocker.Application.Services;
-using CountryBlocker.Domain.Interfaces;
+using CountryBlocker.Infrastructure.ExternalServices;
+using CountryBlocker.Infrastructure.Repositories;
 
 namespace CountryBlocker.Api
 {
@@ -14,12 +17,14 @@ namespace CountryBlocker.Api
             // Register Application Services
             builder.Services.AddScoped<BlockedCountryService>();
             builder.Services.AddScoped<IPCheckService>();
-            builder.Services.AddScoped<LogService>();
+            builder.Services.AddScoped<BlockedAttemptLogService>();
 
             // Register Repository Implementations (In-Memory)
-            builder.Services.AddSingleton<IBlockedCountryRepository, InMemoryCountryBlockRepository>();
-            builder.Services.AddSingleton<ILogRepository, InMemoryLogRepository>();
+            builder.Services.AddSingleton<IBlockedCountryRepository, InMemoryBlockedCountryRepository>();
+            builder.Services.AddSingleton<IBlockedAttemptLogRepository, InMemoryLogRepository>();
             builder.Services.AddSingleton<ITemporalBlockedCountryRepository, InMemoryTemporalBlockRepository>();
+            builder.Services.AddScoped<IGeoLocationProvider, GeoLocationService>();
+
 
             //Swagger configuration for api documentation
             builder.Services.AddEndpointsApiExplorer();

@@ -7,9 +7,9 @@ namespace CountryBlocker.Api.Controllers
     [ApiController]
     public class LogsController : ControllerBase
     {
-        private readonly LogService _logService;
+        private readonly BlockedAttemptLogService _logService;
 
-        public LogsController(LogService logService)
+        public LogsController(BlockedAttemptLogService logService)
         {
             _logService = logService;
         }

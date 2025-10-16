@@ -1,6 +1,6 @@
 ﻿namespace CountryBlocker.Application.DTOs
 {
-    public class GeoInfoDTO
+    public class GeoInfo
     {
         public string Ip { get; set; } = string.Empty;
         public string CountryCode { get; set; } = string.Empty;

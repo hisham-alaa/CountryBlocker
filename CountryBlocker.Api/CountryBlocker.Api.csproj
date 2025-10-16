@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CountryBlocker.Application\CountryBlocker.Application.csproj" />
+    <ProjectReference Include="..\CountryBlocker.Infrastructure\CountryBlocker.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

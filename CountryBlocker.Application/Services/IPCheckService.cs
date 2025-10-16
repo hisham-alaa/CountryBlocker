@@ -1,43 +1,69 @@
-﻿using CountryBlocker.Application.Interfaces;
-using CountryBlocker.Domain.Interfaces;
+﻿using CountryBlocker.Application.DTOs;
+using CountryBlocker.Application.Interfaces;
+using CountryBlocker.Application.Interfaces.IRepository;
+using CountryBlocker.Application.Interfaces.IService;
 using CountryBlocker.Domain.Models;
 
 namespace CountryBlocker.Application.Services
 {
-    public class IPCheckService
+    public class IPCheckService : IIPCheckService
     {
-        private readonly IGeoLocationService _geoService;
-        private readonly IBlockedCountryRepository _blockRepo;
-        private readonly ILogRepository _logRepo;
-
+        private readonly IGeoLocationProvider _geoProvider;
+        private readonly IBlockedCountryRepository _countryRepository;
+        private readonly IBlockedAttemptLogRepository _logService;
         public IPCheckService(
-            IGeoLocationService geoService,
-            IBlockedCountryRepository blockRepo,
-            ILogRepository logRepo)
+        IGeoLocationProvider geoProvider,
+        IBlockedCountryRepository countryRepository,
+        IBlockedAttemptLogRepository logService)
         {
-            _geoService = geoService;
-            _blockRepo = blockRepo;
-            _logRepo = logRepo;
+            _geoProvider = geoProvider;
+            _countryRepository = countryRepository;
+            _logService = logService;
         }
 
-        public async Task<bool> IsIpBlockedAsync(string ip, string userAgent)
+        public async Task<ServiceResult<GeoInfo>> LookupIpAsync(string? ipAddress)
         {
-            var geoInfo = await _geoService.GetGeoInfoAsync(ip);
+            if (string.IsNullOrWhiteSpace(ipAddress))
+                return ServiceResult<GeoInfo>.Fail("IP address is required.");
 
-            if (geoInfo is null)
-                throw new InvalidOperationException("Unable to fetch IP info.");
+            var geoInfo = await _geoProvider.GetGeoInfoAsync(ipAddress);
+            if (geoInfo == null)
+                return ServiceResult<GeoInfo>.Fail("Failed to retrieve geolocation info.");
 
-            var isBlocked = _blockRepo.Exists(geoInfo.CountryCode);
+            return ServiceResult<GeoInfo>.Ok(geoInfo);
+        }
 
-            _logRepo.Add(new BlockAttemptLog
+        public async Task<ServiceResult<BlockedCheckResultDTO>> CheckIfBlockedAsync(string ipAddress, string userAgent)
+        {
+            var geoInfo = await _geoProvider.GetGeoInfoAsync(ipAddress);
+            if (geoInfo == null)
+                return ServiceResult<BlockedCheckResultDTO>.Fail("Unable to determine IP location.");
+
+            var country = await _countryRepository.GetByCodeAsync(geoInfo.CountryCode);
+            var isBlocked = country != null && (!country.IsTemporary || !country.IsExpired);
+
+            var log = new BlockedAttemptLog(ipAddress, geoInfo.CountryCode, isBlocked, userAgent);
+
+            await _logService.AddAsync(log);
+
+            var result = new BlockedCheckResultDTO
             {
-                IpAddress = ip,
+                IpAddress = ipAddress,
+                CountryCode = geoInfo.CountryCode,
                 IsBlocked = isBlocked,
-                UserAgent = userAgent,
-                Timestamp = DateTime.UtcNow
-            });
+                Message = isBlocked
+                    ? $"Access blocked. Country '{geoInfo.CountryCode}' is restricted."
+                    : "Access allowed."
+            };
 
-            return isBlocked;
+            return ServiceResult<BlockedCheckResultDTO>.Ok(result);
         }
+
+
+
     }
+
 }
+
+
+

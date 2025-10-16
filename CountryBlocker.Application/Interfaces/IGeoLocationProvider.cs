@@ -2,8 +2,8 @@
 
 namespace CountryBlocker.Application.Interfaces
 {
-    public interface IGeoLocationService
+    public interface IGeoLocationProvider
     {
-        Task<GeoInfoDTO?> GetGeoInfoAsync(string ip);
+        Task<GeoInfo?> GetGeoInfoAsync(string ip);
     }
 }
