@@ -23,7 +23,7 @@ namespace CountryBlocker.Infrastructure.Extensions
             services.AddHttpClient("IpApi-Client", client =>
             {
                 client.BaseAddress = new Uri("https://ipapi.co/");
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; GeoChecker/1.0)");
             });
 
             #endregion Http Clients
