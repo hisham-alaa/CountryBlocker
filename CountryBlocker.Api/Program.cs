@@ -30,7 +30,7 @@ namespace CountryBlocker.Api
             #region Infrastructure Services
 
             builder.Services.AddInfrastructure();
-
+            builder.Services.AddHttpContextAccessor();
             #endregion Infrastructure Services
 
             var app = builder.Build();
