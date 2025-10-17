@@ -12,6 +12,7 @@
         }
 
         public static ServiceResult Ok(string message = "") => new(true, message);
+
         public static ServiceResult Fail(string message) => new(false, message);
     }
 
@@ -25,7 +26,7 @@
         }
 
         public static ServiceResult<T> Ok(T data, string message = "") => new(true, message, data);
-        public static new ServiceResult<T> Fail(string message) => new(false, message, default);
-    }
 
+        public new static ServiceResult<T> Fail(string message) => new(false, message, default);
+    }
 }

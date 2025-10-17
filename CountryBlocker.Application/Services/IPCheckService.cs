@@ -11,10 +11,11 @@ namespace CountryBlocker.Application.Services
         private readonly IGeoLocationProvider _geoProvider;
         private readonly IBlockedCountryRepository _countryRepository;
         private readonly IBlockedAttemptLogRepository _logService;
+
         public IPCheckService(
-        IGeoLocationProvider geoProvider,
-        IBlockedCountryRepository countryRepository,
-        IBlockedAttemptLogRepository logService)
+                        IGeoLocationProvider geoProvider,
+                        IBlockedCountryRepository countryRepository,
+                        IBlockedAttemptLogRepository logService)
         {
             _geoProvider = geoProvider;
             _countryRepository = countryRepository;
@@ -58,12 +59,5 @@ namespace CountryBlocker.Application.Services
 
             return ServiceResult<BlockedCheckResultDTO>.Ok(result);
         }
-
-
-
     }
-
 }
-
-
-

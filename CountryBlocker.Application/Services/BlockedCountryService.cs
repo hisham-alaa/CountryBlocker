@@ -33,16 +33,21 @@ namespace CountryBlocker.Application.Services
                 : ServiceResult.Fail($"Country '{countryCode}' is not currently blocked.");
         }
 
-        public async Task<PagedResult<BlockedCountryDTO>> GetBlockedCountriesAsync(int page, int pageSize, string? search = null)
+        public async Task<PagedResult<BlockedCountryDTO>> GetBlockedCountriesAsync(int page = 1,
+                                                                                    int pageSize = 5,
+                                                                                    string? code = null,
+                                                                                    string? name = null)
         {
             var countries = await _blockedCountryRepository.GetAllAsync();
 
-            if (!string.IsNullOrWhiteSpace(search))
-                countries = countries.Where(c =>
-                    c.Code.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                    c.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(code))
+                countries = countries.Where(c => c.Code.Contains(code, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(name))
+                countries = countries.Where(c => c.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
 
             var totalCount = countries.Count();
+
             var paged = countries
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -91,6 +96,11 @@ namespace CountryBlocker.Application.Services
                         await _blockedCountryRepository.RemoveAsync(country.Code);
                 }
             }
+        }
+
+        public Task<PagedResult<BlockedCountryDTO>> GetBlockedCountriesAsync(int page)
+        {
+            throw new NotImplementedException();
         }
     }
 }

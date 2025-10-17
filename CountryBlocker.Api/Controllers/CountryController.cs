@@ -1,49 +1,57 @@
 ﻿using CountryBlocker.Application.DTOs;
-using CountryBlocker.Application.Services;
+using CountryBlocker.Application.Interfaces.IService;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CountryBlocker.Api.Controllers
+namespace Api.Controllers
 {
-    [Route("api/countries")]
     [ApiController]
-    public class CountryController : ControllerBase
+    [Route("api/[controller]")]
+    public class CountriesController : ControllerBase
     {
-        private readonly BlockedCountryService _countryService;
+        private readonly IBlockedCountryService _blockedCountryService;
 
-        public CountryController(BlockedCountryService countryService)
+        public CountriesController(IBlockedCountryService countryService)
         {
-            _countryService = countryService;
+            _blockedCountryService = countryService;
         }
 
         [HttpPost("block")]
-        public IActionResult BlockCountry([FromBody] BlockCountryRequest request)
+        public async Task<IActionResult> BlockCountry([FromBody] BlockedCountryRequest request)
         {
-            try
-            {
-                _countryService.BlockCountry(request.CountryCode);
-                return Ok(new { Message = $"Country {request.CountryCode} blocked successfully" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
+            var result = await _blockedCountryService.BlockCountryAsync(request.CountryCode, request.CountryName);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("unblock/{countryCode}")]
-        public IActionResult UnblockCountry(string countryCode)
+        [HttpPost("block-temporary")]
+        public async Task<IActionResult> BlockTemporary([FromBody] TemporaryBlockRequest request)
         {
-            var success = _countryService.UnBlockCountry(countryCode);
-            if (!success)
-                return NotFound(new { Message = "Country not found or already unblocked" });
-
-            return Ok(new { Message = $"Country {countryCode} unblocked successfully" });
+            var result = await _blockedCountryService.TemporarilyBlockCountryAsync(request.CountryCode, request.CountryName, request.DurationMinutes);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("blocked")]
-        public IActionResult GetBlockedCountries()
+        [HttpDelete("block/{countryCode}")]
+        public async Task<IActionResult> UnblockCountry(string countryCode)
         {
-            var blocked = _countryService.GetAllBlockedCountries();
-            return Ok(blocked);
+            var result = await _blockedCountryService.UnblockCountryAsync(countryCode);
+            return result.Success ? Ok(result) : NotFound(result);
         }
+
+        [HttpPost("blocked")]
+        public async Task<IActionResult> GetBlockedCountries([FromBody] GetBlockedCountriesRequest request)
+        {
+            var countries = await _blockedCountryService.GetBlockedCountriesAsync(request.Page, request.PageSize, request.CountryCode, request.CountryName);
+            return Ok(countries);
+        }
+    }
+
+    public class BlockedCountryRequest
+    {
+        public string CountryCode { get; set; } = string.Empty;
+        public string CountryName { get; set; } = string.Empty;
+    }
+
+    public class TemporaryBlockRequest : BlockedCountryRequest
+    {
+        public int DurationMinutes { get; set; }
     }
 }

@@ -1,8 +1,6 @@
-using CountryBlocker.Application.Interfaces;
-using CountryBlocker.Application.Interfaces.IRepository;
+using CountryBlocker.Application.Interfaces.IService;
 using CountryBlocker.Application.Services;
-using CountryBlocker.Infrastructure.ExternalServices;
-using CountryBlocker.Infrastructure.Repositories;
+using CountryBlocker.Infrastructure.Extensions;
 
 namespace CountryBlocker.Api
 {
@@ -14,25 +12,29 @@ namespace CountryBlocker.Api
 
             builder.Services.AddControllers();
 
-            // Register Application Services
-            builder.Services.AddScoped<BlockedCountryService>();
-            builder.Services.AddScoped<IPCheckService>();
-            builder.Services.AddScoped<BlockedAttemptLogService>();
+            #region Application Services
 
-            // Register Repository Implementations (In-Memory)
-            builder.Services.AddSingleton<IBlockedCountryRepository, InMemoryBlockedCountryRepository>();
-            builder.Services.AddSingleton<IBlockedAttemptLogRepository, InMemoryLogRepository>();
-            builder.Services.AddSingleton<ITemporalBlockedCountryRepository, InMemoryTemporalBlockRepository>();
-            builder.Services.AddScoped<IGeoLocationProvider, GeoLocationService>();
+            builder.Services.AddScoped<IBlockedCountryService, BlockedCountryService>();
+            builder.Services.AddScoped<IIPCheckService, IPCheckService>();
+            builder.Services.AddScoped<IBlockedAttemptLogService, BlockedAttemptLogService>();
 
+            #endregion Application Services
 
-            //Swagger configuration for api documentation
+            #region Swagger configuration for api documentation
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            #endregion Swagger configuration for api documentation
+
+            #region Infrastructure Services
+
+            builder.Services.AddInfrastructure();
+
+            #endregion Infrastructure Services
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -40,6 +42,7 @@ namespace CountryBlocker.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthorization();
             app.MapControllers();
 
             app.Run();

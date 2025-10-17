@@ -6,7 +6,6 @@ namespace CountryBlocker.Infrastructure.Repositories
 {
     public class InMemoryLogRepository : IBlockedAttemptLogRepository
     {
-
         private readonly ConcurrentQueue<BlockedAttemptLog> _logs = new();
 
         public Task AddAsync(BlockedAttemptLog log)

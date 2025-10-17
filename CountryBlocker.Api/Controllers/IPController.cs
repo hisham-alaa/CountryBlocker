@@ -1,35 +1,32 @@
-﻿using CountryBlocker.Application.Services;
+﻿using CountryBlocker.Application.Interfaces.IService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CountryBlocker.Api.Controllers
 {
-    [Route("api/ip")]
     [ApiController]
-    public class IpController : ControllerBase
+    [Route("api/[controller]")]
+    public class IPController : ControllerBase
     {
-        private readonly IPCheckService _ipCheckService;
+        private readonly IIPCheckService _ipService;
 
-        public IpController(IPCheckService ipCheckService)
+        public IPController(IIPCheckService ipService)
         {
-            _ipCheckService = ipCheckService;
+            _ipService = ipService;
         }
 
-        [HttpGet("check-block")]
-        public async Task<IActionResult> CheckBlock()
+        [HttpGet("lookup")]
+        public async Task<IActionResult> Lookup([FromQuery] string ip)
         {
-            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var result = await _ipService.LookupIpAsync(ip);
+            return result.Success ? Ok(result.Data) : BadRequest(result.Message);
+        }
 
-            if (string.IsNullOrEmpty(ip))
-                return BadRequest(new { Message = "Unable to determine IP address" });
-
-            var userAgent = Request.Headers["User-Agent"].ToString();
-            var isBlocked = await _ipCheckService.IsIpBlockedAsync(ip, userAgent);
-
-            return Ok(new
-            {
-                Ip = ip,
-                IsBlocked = isBlocked
-            });
+        [HttpGet("check")]
+        public async Task<IActionResult> Check([FromQuery] string ip)
+        {
+            var userAgent = Request.Headers.UserAgent.ToString();
+            var result = await _ipService.CheckIfBlockedAsync(ip, userAgent);
+            return Ok(result.Data);
         }
     }
 }

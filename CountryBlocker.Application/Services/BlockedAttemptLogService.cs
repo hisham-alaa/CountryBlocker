@@ -40,6 +40,5 @@ namespace CountryBlocker.Application.Services
                 TotalCount = mapped.Count()
             };
         }
-
     }
 }

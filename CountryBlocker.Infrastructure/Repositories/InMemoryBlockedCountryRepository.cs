@@ -31,6 +31,5 @@ namespace CountryBlocker.Infrastructure.Repositories
             var values = _countries.Values.AsEnumerable();
             return Task.FromResult(values);
         }
-
     }
 }

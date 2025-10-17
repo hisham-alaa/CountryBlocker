@@ -5,7 +5,7 @@ namespace CountryBlocker.Application.Interfaces.IService
     public interface IIPCheckService
     {
         Task<ServiceResult<GeoInfo>> LookupIpAsync(string? ipAddress);
-        Task<ServiceResult<BlockedCheckResultDTO>> CheckIfBlockedAsync(string ipAddress, string userAgent);
 
+        Task<ServiceResult<BlockedCheckResultDTO>> CheckIfBlockedAsync(string ipAddress, string userAgent);
     }
 }

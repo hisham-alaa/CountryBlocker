@@ -11,6 +11,5 @@
         public bool IsTemporary => ExpiryDate.HasValue;
 
         public bool IsExpired => IsTemporary && ExpiryDate <= DateTime.UtcNow;
-
     }
 }

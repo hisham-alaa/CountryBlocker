@@ -1,23 +1,23 @@
-﻿using CountryBlocker.Application.Services;
+﻿using CountryBlocker.Application.Interfaces.IService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CountryBlocker.Api.Controllers
 {
-    [Route("api/logs")]
     [ApiController]
+    [Route("api/[controller]")]
     public class LogsController : ControllerBase
     {
-        private readonly BlockedAttemptLogService _logService;
+        private readonly IBlockedAttemptLogService _logService;
 
-        public LogsController(BlockedAttemptLogService logService)
+        public LogsController(IBlockedAttemptLogService logService)
         {
             _logService = logService;
         }
 
         [HttpGet("blocked-attempts")]
-        public IActionResult GetBlockedAttempts()
+        public async Task<IActionResult> GetBlockedAttempts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var logs = _logService.GetLogs();
+            var logs = await _logService.GetPagedAsync(page, pageSize);
             return Ok(logs);
         }
     }
