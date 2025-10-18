@@ -17,18 +17,21 @@ namespace CountryBlocker.Api.Controllers
         }
 
         [HttpGet("lookup")]
-        public async Task<IActionResult> Lookup([FromQuery] string ip)
+        public async Task<IActionResult> Lookup([FromQuery] string? ip)
         {
+            if (string.IsNullOrWhiteSpace(ip))
+                ip = GetClientIp();
+
             var result = await _ipService.LookupIpAsync(ip);
             return result.Success ? Ok(result.Data) : BadRequest(result.Message);
         }
 
         [HttpGet("check")]
-        public async Task<IActionResult> Check()
+        public async Task<IActionResult> Check([FromQuery] string? ip)
         {
             var userAgent = Request.Headers.UserAgent.ToString();
-            var ipAddress = GetClientIp();
-            var result = await _ipService.CheckIfBlockedAsync(ipAddress, userAgent);
+            ip = GetClientIp();
+            var result = await _ipService.CheckIfBlockedAsync(ip, userAgent);
             return Ok(result.Data);
         }
 
